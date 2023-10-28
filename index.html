@@ -1,28 +1,39 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <div class="container">
-            <div class="game hidden">
-                <div class="board-container">
 
-                </div>
-                <div class="player-turn"></div>
-                <div class="player-win"></div>
-                <div class="tie"></div>
-            </div>
-            <div class="message-container"></div>
-            <button class="start-button hidden">Start</button>
-            <button class="reset-button hidden">Reset</button>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div>
+            <label for="player1">Player 1:</label>
+            <input type="text" id="player1" name="player1" required>
         </div>
-        
-        <script src="index.js"></script>
-    </body>
+        <div>
+            <label for="player2">Player 2:</label>
+            <input type="text" id="player2" name="player2" required>
+        </div>
+        <div class="game hidden">
+            <div class="board-container">
+
+            </div>
+            <div class="player-turn"></div>
+            <div class="player-win"></div>
+            <div class="tie"></div>
+        </div>
+        <div class="message-container"></div>
+        <button class="start-button">Start</button>
+        <button class="reset-button">Reset</button>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
 </html>
