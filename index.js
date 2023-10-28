@@ -51,9 +51,7 @@ const gameController = (() => {
         gameBoard.resetBoard();
         currentPlayer = player1;
         displayController.displayBoard();
-        displayController.displayPlayerTurn();
-        displayController.resetGameOver();
-        document.querySelector('.player-win').textContent = '';  // Clear the winner
+        document.getElementById('winner-message').style.display = 'none'; // hide winner message
     }
 
     const winningCombinations = [
@@ -160,6 +158,13 @@ const displayController = (() => {
         const playerWin = document.querySelector(".player-win");
         playerWin.textContent = `${playerName} wins!`;
     }
+
+    const displayWinner = (player) => {
+        const winnerMessage = document.getElementById('winner-message');
+        winnerMessage.textContent = `${player} is the winner!`;
+        winnerMessage.style.display = 'block';
+    }
+
     const displayTie = () => {
         const tie = document.querySelector(".tie");
         tie.textContent = "It's a tie!";
@@ -172,6 +177,6 @@ const displayController = (() => {
         const game = document.querySelector(".game");
         game.classList.add("hidden");
     }
-    return { displayBoard, displayPlayerTurn, hidePlayerTurn, hideStartButton, displayResetButton, displayGame, isGameOver, resetGameOver };
+    return { displayWinner, displayBoard, displayPlayerTurn, hidePlayerTurn, hideStartButton, displayResetButton, displayGame, isGameOver, resetGameOver };
 })();
 
