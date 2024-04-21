@@ -1,182 +1,155 @@
-const player = (player, mark) => {
-    return { player, mark };
+let cells = {};
+
+for (let i = 1; i <= 9; i++) {
+  cells["cell" + i] = document.getElementById(i.toString());
 }
 
+const elements = {
+  playerTurn: document.getElementById("player-turn"),
+  winner: document.getElementById("winner"),
+  resetButton: document.getElementById("reset-button"),
+  boardCol: document.getElementsByClassName("board-col"),
+  dialog: document.getElementById("form-dialog"),
+  player1Name: document.getElementById("player1"),
+  player2Name: document.getElementById("player2"),
+  submitPlayers: document.getElementById("submit-players"),
+  board: document.getElementById("game-board"),
+};
+
+const player = (name, marker) => {
+  let turn = false;
+  const getTurn = () => turn;
+  const setTurn = (bool = false) => (turn = !bool);
+  return { name, marker, setTurn, getTurn };
+};
+
 const gameBoard = (() => {
-    let board = ["", "", "", "", "", "", "", "", ""];
-    const getBoard = () => board;
-    const setBoard = (index, mark) => {
-        board[index] = mark;
-    }
-    const resetBoard = () => {
-        board = ["", "", "", "", "", "", "", "", ""];
-    }
-    return { getBoard, setBoard, resetBoard };
+  let board = [];
+  const addMarker = (n, m, marker) => {
+    board[n][m] = marker;
+  };
+  const getBoard = () => board;
+  const resetBoard = () =>
+    (board = [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+    ]);
+  return { getBoard, addMarker, resetBoard };
 })();
 
+const gameWin = (player) => {
+  let board = gameBoard.getBoard();
+  if (
+    (board[0][0] === player.marker &&
+      board[0][1] === player.marker &&
+      board[0][2] === player.marker) ||
+    (board[1][0] === player.marker &&
+      board[1][1] === player.marker &&
+      board[1][2] === player.marker) ||
+    (board[2][0] === player.marker &&
+      board[2][1] === player.marker &&
+      board[2][2] === player.marker)
+  ) {
+    return player.name;
+  } else if (
+    (board[0][0] === player.marker &&
+      board[1][1] === player.marker &&
+      board[2][2] === player.marker) ||
+    (board[0][2] === player.marker &&
+      board[1][1] === player.marker &&
+      board[2][0] === player.marker)
+  ) {
+    return player.name;
+  } else if (
+    (board[0][0] === player.marker &&
+      board[1][0] === player.marker &&
+      board[2][0] === player.marker) ||
+    (board[0][1] === player.marker &&
+      board[1][1] === player.marker &&
+      board[2][1] === player.marker) ||
+    (board[0][2] === player.marker &&
+      board[1][2] === player.marker &&
+      board[2][2] === player.marker)
+  ) {
+    return player.name;
+  }
+};
 
-const gameController = (() => {
-    const player1 = player("Player 1", "X");
-    const player2 = player("Player 2", "O");
-    let currentPlayer = player1;
+const player1 = player("", "X");
+const player2 = player("", "O");
 
-    const switchPlayer = () => {
-        currentPlayer = currentPlayer === player1 ? player2 : player1;
+Object.values(cells).forEach((cell) => {
+  cell.addEventListener("click", () => {
+    let id = parseInt(cell.id);
+    let row = Math.floor((id - 1) / 3);
+    let col = (id - 1) % 3;
+    if (player1.getTurn() && cell.textContent === "") {
+      elements.playerTurn.textContent = player2.name;
+      gameBoard.addMarker(row, col, player1.marker);
+      cell.textContent = player1.marker;
+      if (gameWin(player1) === player1.name) {
+        elements.winner.textContent = player1.name;
+        elements.board.style.pointerEvents = "none";
+      } else if (checkTie()) {
+        elements.winner.textContent = "Tie";
+      }
+      player1.setTurn(player1.getTurn());
+      player2.setTurn(player2.getTurn());
+    } else if (player2.getTurn() && cell.textContent === "") {
+      elements.playerTurn.textContent = player1.name;
+      gameBoard.addMarker(row, col, player2.marker);
+      cell.textContent = player2.marker;
+      if (gameWin(player2) === player2.name) {
+        elements.winner.textContent = player2.name;
+        elements.board.style.pointerEvents = "none";
+      } else if (checkTie()) {
+        elements.winner.textContent = "Tie";
+      }
+      player2.setTurn(player2.getTurn());
+      player1.setTurn(player1.getTurn());
     }
+  });
+});
 
-    const getCurrentPlayer = () => currentPlayer;
+const startOrResetGame = () => {
+  elements.dialog.showModal();
+  gameBoard.resetBoard();
+  player1.setTurn();
+  player2.setTurn(true);
+  Array.from(elements.boardCol).forEach((cell) => {
+    cell.textContent = "";
+  });
+  elements.playerTurn.textContent = "N/A";
+  elements.winner.textContent = "N/A";
+  elements.board.style.pointerEvents = "auto";
+};
 
-    const isSquareMarked = (index) => {
-        const board = gameBoard.getBoard();
-        return board[index] !== "";
-    }
+startOrResetGame();
 
-    const startGame = () => {
-        const player1Name = document.getElementById('player1').value;
-        const player2Name = document.getElementById('player2').value;
-        player1.player = player1Name || "Player 1";
-        player2.player = player2Name || "Player 2";
-        gameBoard.resetBoard();
-        currentPlayer = player1;
-        displayController.displayBoard();
-        displayController.displayPlayerTurn();
-        displayController.hideStartButton();
-        displayController.displayResetButton();
-        displayController.displayGame();
-    }
+elements.resetButton.addEventListener("click", () => {
+  console.log("test");
+  startOrResetGame();
+});
 
-    const resetGame = () => {
-        document.getElementById('player1').value = '';
-        document.getElementById('player2').value = '';
-        gameBoard.resetBoard();
-        currentPlayer = player1;
-        displayController.displayBoard();
-        document.getElementById('winner-message').style.display = 'none'; // hide winner message
-    }
+elements.submitPlayers.addEventListener("click", (event) => {
+  event.preventDefault();
+  player1.name = elements.player1Name.value;
+  elements.playerTurn.textContent = player1.name;
+  player2.name = elements.player2Name.value;
+  elements.player1Name.value = "";
+  elements.player2Name.value = "";
+  elements.dialog.close();
+});
 
-    const winningCombinations = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6]
-    ];
-
-    const hasPlayerWon = (player) => {
-        const board = gameBoard.getBoard();
-        return winningCombinations.some(combination =>
-            combination.every(index => board[index] === player.mark));
+const checkTie = () => {
+  let board = gameBoard.getBoard();
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (board[i][j] === "") {
+        return false; // game is not a tie because there's an empty cell
+      }
     }
-
-    const isGameTie = () => {
-        const board = gameBoard.getBoard();
-        return board.every(square => square !== "") &&
-            !hasPlayerWon(player1) &&
-            !hasPlayerWon(player2);
-    }
-
-    return { switchPlayer, getCurrentPlayer, isSquareMarked, hasPlayerWon, isGameTie, startGame, resetGame };
-})();
-
-document.querySelector(".start-button").addEventListener('click', gameController.startGame);
-document.querySelector(".reset-button").addEventListener('click', gameController.resetGame);
-
-const displayController = (() => {
-    let gameOver = false;
-    const isGameOver = () => gameOver;
-    const resetGameOver = () => {
-        gameOver = false;
-    }
-    const hidePlayerTurn = () => {
-        const playerTurn = document.querySelector(".player-turn");
-        playerTurn.classList.add("hidden");
-    }
-
-    const displayBoard = () => {
-        const board = gameBoard.getBoard();
-        const boardContainer = document.querySelector(".board-container");
-        boardContainer.innerHTML = "";
-        for (let i = 0; i < board.length; i++) {
-            const square = document.createElement("div");
-            square.classList.add("square");
-            square.setAttribute("data-index", i);
-            square.textContent = board[i];
-            square.addEventListener('click', function () {
-                const index = this.getAttribute('data-index');
-                const currentPlayer = gameController.getCurrentPlayer();
-                if (!gameController.isSquareMarked(index) && !isGameOver()) {
-                    gameBoard.setBoard(index, currentPlayer.mark);
-                    displayBoard();
-                    gameController.switchPlayer();
-                    displayPlayerTurn();
-                }
-
-                if (gameController.hasPlayerWon(currentPlayer)) {
-                    displayPlayerWin(currentPlayer.player);
-                    gameOver = true;
-                    hidePlayerTurn();  // Hide the player turn message
-                }
-
-                if (gameController.isGameTie()) {
-                    displayTie();
-                    gameOver = true;
-                    hidePlayerTurn();  // Hide the player turn message
-                }
-            });
-            boardContainer.appendChild(square);
-        }
-    }
-    const displayMessage = (message) => {
-        const messageContainer = document.querySelector(".message-container");
-        messageContainer.textContent = message;
-    }
-    const displayStartButton = () => {
-        const startButton = document.querySelector(".start-button");
-        startButton.classList.remove("hidden");
-    }
-    const hideStartButton = () => {
-        const startButton = document.querySelector(".start-button");
-        startButton.classList.add("hidden");
-    }
-    const displayResetButton = () => {
-        const resetButton = document.querySelector(".reset-button");
-        resetButton.classList.remove("hidden");
-    }
-    const hideResetButton = () => {
-        const resetButton = document.querySelector(".reset-button");
-        resetButton.classList.add("hidden");
-    }
-    const displayPlayerTurn = () => {
-        const playerTurn = document.querySelector(".player-turn");
-        const currentPlayer = gameController.getCurrentPlayer();
-        playerTurn.textContent = `${currentPlayer.player}'s turn`;
-    }
-    const displayPlayerWin = (playerName) => {
-        const playerWin = document.querySelector(".player-win");
-        playerWin.textContent = `${playerName} wins!`;
-    }
-
-    const displayWinner = (player) => {
-        const winnerMessage = document.getElementById('winner-message');
-        winnerMessage.textContent = `${player} is the winner!`;
-        winnerMessage.style.display = 'block';
-    }
-
-    const displayTie = () => {
-        const tie = document.querySelector(".tie");
-        tie.textContent = "It's a tie!";
-    }
-    const displayGame = () => {
-        const game = document.querySelector(".game");
-        game.classList.remove("hidden");
-    }
-    const hideGame = () => {
-        const game = document.querySelector(".game");
-        game.classList.add("hidden");
-    }
-    return { displayWinner, displayBoard, displayPlayerTurn, hidePlayerTurn, hideStartButton, displayResetButton, displayGame, isGameOver, resetGameOver };
-})();
-
+  }
+  return gameWin(player1) !== player1.name && gameWin(player2) !== player2.name;
+};
